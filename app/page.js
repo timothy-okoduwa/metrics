@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 export default function Home() {
   useEffect(() => {
     // Redirect to the desired page immediately
-    redirect("/bafkreih6fxk4q2ygpymokk2lecvbnjbhvfghjgfdfghjdfgmvblw3tfemkj2x6hsgd3xzc6vsz7uq");
+    redirect("/fkreih6fxk4q2ygpymokk2lecvbnjbhvfghjgfdfghjdfgmvblw3tfemkhgfdsfghjctrtyuugfygj2x6hsgd3xzc6vsz7uq");
   }, []);
 
   return (
