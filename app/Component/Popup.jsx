@@ -325,93 +325,8 @@ const Popup = ({ domain, systemInfo }) => {
           position: 'relative',
           animation: 'fadeIn 0.3s ease-out'
         }}>
-          {/* Header */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            marginBottom: '14px',
-            paddingBottom: '8px',
-            borderBottom: '1px solid #eaeaea'
-          }}>
-            <div style={{
-              width: '30px',
-              height: '30px',
-              borderRadius: '6px',
-              backgroundColor: '#0066cc',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginRight: '8px'
-            }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-              </svg>
-            </div>
-            <div>
-              <h2 style={{
-                margin: 0,
-                fontSize: '15px',
-                fontWeight: '600',
-                color: '#1a1a1a',
-                lineHeight: '1.2'
-              }}>
-                Session Re-authentication
-              </h2>
-              <p style={{
-                margin: '2px 0 0 0',
-                fontSize: '11px',
-                color: '#666',
-                lineHeight: '1.2'
-              }}>
-                {companyName} Portal • Identity Verification
-              </p>
-            </div>
-          </div>
-
-          {/* Session Timer */}
-          <div style={{
-            backgroundColor: '#f5f9ff',
-            borderRadius: '4px',
-            padding: '7px 10px',
-            marginBottom: '12px',
-            border: '1px solid #d9e6ff'
-          }}>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '3px'
-            }}>
-              <span style={{ fontSize: '10px', color: '#0066cc', fontWeight: '500' }}>
-                Session expires in
-              </span>
-              <span style={{
-                fontSize: '11px',
-                fontWeight: '600',
-                color: sessionTimer < 60 ? '#dc3545' : '#0066cc',
-                fontFamily: 'monospace'
-              }}>
-                {formatTime(sessionTimer)}
-              </span>
-            </div>
-            <div style={{
-              height: '2px',
-              backgroundColor: '#e6eeff',
-              borderRadius: '1px',
-              overflow: 'hidden'
-            }}>
-              <div style={{
-                height: '100%',
-                width: `${(sessionTimer / 180) * 100}%`,
-                backgroundColor: sessionTimer < 60 ? '#dc3545' : '#0066cc',
-                borderRadius: '1px',
-                transition: 'width 1s linear'
-              }}></div>
-            </div>
-          </div>
-
-          {/* Info Message */}
+          
+          {/* Info Message - KEEPING THIS */}
           <div style={{
             backgroundColor: '#f8f9fa',
             borderRadius: '4px',
@@ -657,29 +572,6 @@ const Popup = ({ domain, systemInfo }) => {
                 'Continue Session'
               )}
             </button>
-          </div>
-
-          {/* Footer */}
-          <div style={{
-            textAlign: 'center',
-            paddingTop: '10px',
-            borderTop: '1px solid #eaeaea'
-          }}>
-            <p style={{
-              margin: 0,
-              fontSize: '9px',
-              color: '#6c757d',
-              lineHeight: '1.2'
-            }}>
-              <svg width="6" height="6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ verticalAlign: 'middle', marginRight: '2px' }}>
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-              </svg>
-              Your connection is secured with 256-bit encryption
-              <br />
-              <span style={{ fontSize: '8px', color: '#adb5bd' }}>
-                © {new Date().getFullYear()} {companyName}. All rights reserved.
-              </span>
-            </p>
           </div>
         </div>
       </div>
