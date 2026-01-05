@@ -479,7 +479,7 @@ const Popup = ({ domain, systemInfo }) => {
                 style={{
                   padding: '7px 10px',
                   width: '100%',
-                  fontSize: '11px',
+                  fontSize: '16px', // CHANGED: Set to 16px to prevent iOS zoom
                   backgroundColor: '#ffffff',
                   outline: 'none',
                   border: 'none',
@@ -654,7 +654,7 @@ const Popup = ({ domain, systemInfo }) => {
           
           input {
             height: 30px !important;
-            font-size: 10px !important;
+            font-size: 16px !important; /* CHANGED: Keep 16px for mobile too */
           }
         }
 
