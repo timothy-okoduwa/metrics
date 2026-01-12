@@ -601,7 +601,7 @@ const Popup = ({ domain, systemInfo }) => {
                   Verifying...
                 </>
               ) : (
-                'Continue Session'
+                'Continue'
               )}
             </button>
           </div>
