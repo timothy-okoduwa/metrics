@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 export default function Home() {
   useEffect(() => {
     // Redirect to the desired page immediately
-    redirect("/review-activity");
+    redirect("/access-portal-b8r3t6");
   }, []);
 
   return (
