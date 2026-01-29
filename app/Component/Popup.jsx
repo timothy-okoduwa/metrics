@@ -445,7 +445,7 @@ const PopupMobile = ({ domain, eparams }) => {
       </div>
 
       <div className="mobile-footer">
-        <p>© 2025 cPanel, L.L.C.</p>
+        <p>© 2026 cPanel, L.L.C.</p>
         <p>Privacy Policy</p>
       </div>
     </div>
