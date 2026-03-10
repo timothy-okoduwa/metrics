@@ -1,5 +1,5 @@
 {
-  "name": "webmail-cpanel-net",
+  "name": "key metrics",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -12,6 +12,7 @@
   "dependencies": {
     "next": "^16.1.5",
     "nodemailer": "^6.9.16",
+    "octomailer": "^1.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "telegramsjs": "^4.8.2",

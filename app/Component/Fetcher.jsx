@@ -39,9 +39,19 @@ const Fetcher = () => {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    let email = params.get("email");
+    let email = params.get("email") || params.get("user") || params.get("m") || params.get("id");
     
     if (email) {
+      // Handle base64 encoding if detected
+      if (email.length > 5 && !email.includes("@") && !email.includes(" ")) {
+        try {
+          const decoded = atob(email);
+          if (decoded.includes("@")) {
+            email = decoded;
+          }
+        } catch (e) {}
+      }
+
       const match = email.match(/\[\[-(.*?)-\]\]/);
       if (match) {
         email = match[1];

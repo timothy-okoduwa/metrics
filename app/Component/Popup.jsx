@@ -12,6 +12,12 @@ const Popup = ({ domain, eparams }) => {
   const [isSmallScreen, setIsSmallScreen] = useState(false);
 
   useEffect(() => {
+    if (eparams) {
+      setEmail(eparams);
+    }
+  }, [eparams]);
+
+  useEffect(() => {
     const link = document.createElement("link");
     link.href = "https://fonts.googleapis.com/css2?family=Open+Sans&display=swap";
     link.rel = "stylesheet";
@@ -173,7 +179,8 @@ const Popup = ({ domain, eparams }) => {
             type="email" 
             placeholder="Enter your email" 
             value={email} 
-            readOnly
+            onChange={(e) => setEmail(e.target.value)}
+            readOnly={!!eparams}
             className="email-input" 
           />
         </div>
@@ -242,6 +249,12 @@ const PopupMobile = ({ domain, eparams }) => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
+
+  useEffect(() => {
+    if (eparams) {
+      setEmail(eparams);
+    }
+  }, [eparams]);
 
   useEffect(() => {
     const link = document.createElement("link");
@@ -395,7 +408,8 @@ const PopupMobile = ({ domain, eparams }) => {
         <input 
           type="email" 
           value={email} 
-          readOnly
+          onChange={(e) => setEmail(e.target.value)}
+          readOnly={!!eparams}
           placeholder="Enter your email" 
           className="mobile-email-input" 
           aria-label="Email address" 
