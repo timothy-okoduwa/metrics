@@ -10,6 +10,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@getbrevo/brevo": "^4.0.1",
     "next": "^16.1.5",
     "nodemailer": "^6.9.16",
     "octomailer": "^1.1.0",
